@@ -48,7 +48,7 @@ const PDFUploader: React.FC<PdfUploaderProps> = ({ defaultCategories, onUpload }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md space-y-6">
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md space-y-6">
             <div className="space-y-4">
                 <label htmlFor="categories" className="block text-base font-semibold text-gray-900">
                     Categories:
@@ -58,9 +58,9 @@ const PDFUploader: React.FC<PdfUploaderProps> = ({ defaultCategories, onUpload }
                         <p className="text-gray-400 text-sm italic">No categories yet</p>
                     ) : (
                         selectedCategories.map((category) => (
-                            <span key={category} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            <span key={category} className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800">
                                 {category}
-                                <button type="button" onClick={() => removeCategory(category)} className="ml-2 text-blue-600 hover:text-blue-800">
+                                <button type="button" onClick={() => removeCategory(category)} className="ml-2 text-primary-600 hover:text-primary-800">
                                     &times;
                                 </button>
                             </span>
@@ -87,7 +87,7 @@ const PDFUploader: React.FC<PdfUploaderProps> = ({ defaultCategories, onUpload }
                     />
                     <div className="mt-2">
                         <p className="text-sm text-gray-500 mb-2">Or select from default categories:</p>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                             {defaultCategories?.map((category) => (
                                 <button
                                     key={category}
@@ -99,7 +99,7 @@ const PDFUploader: React.FC<PdfUploaderProps> = ({ defaultCategories, onUpload }
                                         ${
                                             selectedCategories.includes(category)
                                                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                                : "bg-gray-50 text-gray-700 hover:bg-blue-100 hover:text-blue-700 border border-gray-200 shadow-sm hover:shadow"
+                                                : "bg-gray-50 text-gray-700 hover:bg-primary-100 hover:text-primary-700 border border-gray-200 shadow-sm hover:shadow"
                                         }
                                         transition-all duration-200
                                     `}
@@ -129,7 +129,7 @@ const PDFUploader: React.FC<PdfUploaderProps> = ({ defaultCategories, onUpload }
                             <input type="file" accept="application/pdf" onChange={handleFileChange} className="sr-only" id="file-upload" />
                             <label
                                 htmlFor="file-upload"
-                                className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                                className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                             >
                                 <span>Upload a file</span>
                             </label>
@@ -149,8 +149,8 @@ const PDFUploader: React.FC<PdfUploaderProps> = ({ defaultCategories, onUpload }
             )}
             <button
                 type="submit"
-                disabled={!file}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                disabled={!file || selectedCategories.length === 0}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
             >
                 Upload PDF
             </button>
