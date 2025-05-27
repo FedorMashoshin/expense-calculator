@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import PDFUploader from "../components/pdfUploader";
+import PDFUploader from "../components/PDFUploader";
 import AvailableMonths from "../components/AvailableMonths";
 import { dummyAvailableMonths } from "../types/expense";
 
