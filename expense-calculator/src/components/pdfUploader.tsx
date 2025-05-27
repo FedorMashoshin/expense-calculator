@@ -48,7 +48,7 @@ const PDFUploader: React.FC<PdfUploaderProps> = ({ defaultCategories, onUpload }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md space-y-6">
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-2 bg-white space-y-6">
             <div className="space-y-4">
                 <label htmlFor="categories" className="block text-base font-semibold text-gray-900">
                     Categories:
