@@ -31,6 +31,7 @@ export default function UploadPage() {
         categories.forEach((category) => formData.append("categories[]", category));
 
         try {
+            console.log(formData);
             const res = await fetch("/api/upload", {
                 method: "POST",
                 body: formData,
@@ -39,7 +40,8 @@ export default function UploadPage() {
                 throw new Error(`Server error: ${res.status}`);
             }
             const json = await res.json();
-            navigate("/results", { state: { expenseData: json } });
+            console.log(json);
+            // navigate("/results", { state: { expenseData: json } });
         } catch (err: unknown) {
             console.error("Upload failed:", err);
             alert(err instanceof Error ? err.message : "An unknown error occurred");
