@@ -1,12 +1,13 @@
 export interface Transaction {
     description: string;
     amount: number;
-    date: string;
+    transactionDate: string;
+    postingDate: string;
 }
 
 export interface Category {
-    category: string;
-    amount: number;
+    name: string;
+    total: number;
     percentage: number;
     transactions: Transaction[];
 }

@@ -24,14 +24,32 @@ type Tab = "upload" | "statements";
 export default function UploadPage() {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<Tab>("upload");
+    const [isLoading, setIsLoading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     const handleUpload = async (file: File, categories: string[]) => {
         const formData = new FormData();
         formData.append("file", file);
         categories.forEach((category) => formData.append("categories[]", category));
 
+        setIsLoading(true);
+        setUploadProgress(0);
+
+        // Smoother progress updates
+        const progressInterval = setInterval(() => {
+            setUploadProgress((prev) => {
+                // Slower progress at the beginning, faster in the middle, slower at the end
+                const increment = prev < 30 ? 2 : prev < 70 ? 3 : 1;
+                if (prev >= 95) {
+                    clearInterval(progressInterval);
+                    return prev;
+                }
+                return Math.min(prev + increment, 95);
+            });
+        }, 200);
+
         try {
-            console.log(formData);
             const res = await fetch("/api/upload", {
                 method: "POST",
                 body: formData,
@@ -40,11 +58,20 @@ export default function UploadPage() {
                 throw new Error(`Server error: ${res.status}`);
             }
             const json = await res.json();
-            console.log(json);
-            // navigate("/results", { state: { expenseData: json } });
+            clearInterval(progressInterval);
+            setUploadProgress(100);
+            setShowSuccess(true);
+            setTimeout(() => {
+                setShowSuccess(false);
+                navigate("/results", { state: { expenseData: json } });
+            }, 5000);
         } catch (err: unknown) {
             console.error("Upload failed:", err);
             alert(err instanceof Error ? err.message : "An unknown error occurred");
+        } finally {
+            clearInterval(progressInterval);
+            setIsLoading(false);
+            setUploadProgress(0);
         }
     };
 
@@ -55,6 +82,36 @@ export default function UploadPage() {
                     <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Expense Calculator</h1>
                     <p className="mt-3 text-lg text-gray-600">Upload your bank statement to analyze your expenses</p>
                 </div>
+
+                {/* Loading Overlay */}
+                {isLoading && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full mx-4">
+                            <h3 className="text-lg font-medium text-gray-800 mb-4">Uploading and analyzing data...</h3>
+
+                            {/* Progress Bar */}
+                            <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+                                <div className="bg-primary-600 h-2 rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }}></div>
+                            </div>
+                            <p className="text-sm text-gray-500">{uploadProgress}%</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Success Message */}
+                {showSuccess && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full mx-4">
+                            <div className="mb-4">
+                                <svg className="w-8 h-8 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-800 mb-2">Upload Successful!</h3>
+                            <p className="text-gray-600">Redirecting to results...</p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Tabs */}
                 <div className="mb-8">

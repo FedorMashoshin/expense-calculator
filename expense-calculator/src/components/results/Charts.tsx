@@ -8,10 +8,10 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 
 const Charts: React.FC<ChartsProps> = ({ categories }) => {
     const chartData = {
-        labels: categories.map((item) => item.category),
+        labels: categories.map((item) => item.name),
         datasets: [
             {
-                data: categories.map((item) => item.amount),
+                data: categories.map((item) => item.total),
                 backgroundColor: [
                     CHART_COLORS.primary,
                     CHART_COLORS.cyan,
@@ -32,11 +32,11 @@ const Charts: React.FC<ChartsProps> = ({ categories }) => {
     };
 
     const barData = {
-        labels: categories.map((item) => item.category),
+        labels: categories.map((item) => item.name),
         datasets: [
             {
                 label: "Amount ($)",
-                data: categories.map((item) => item.amount),
+                data: categories.map((item) => item.total),
                 backgroundColor: CHART_COLORS.blue,
                 borderColor: CHART_COLORS.blue,
                 borderWidth: 1,
