@@ -3,12 +3,13 @@ export interface Transaction {
     amount: number;
     transactionDate: string;
     postingDate: string;
+    category?: string;
 }
 
 export interface Category {
     name: string;
     total: number;
-    percentage: number;
+    percentage?: number;
     transactions: Transaction[];
 }
 
