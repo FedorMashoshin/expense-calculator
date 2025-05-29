@@ -1,5 +1,5 @@
 import { Block } from "@aws-sdk/client-textract";
-import { Transaction } from "src/types/expense";
+import { Transaction } from "../types/expense";
 
 export const validateFileName = (fileName: string): boolean => {
     const pattern = /^[a-z]+_(credit|debit)_\d{2}_\d{2}\.pdf$/;

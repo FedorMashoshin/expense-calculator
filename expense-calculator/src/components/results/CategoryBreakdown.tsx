@@ -1,58 +1,13 @@
 import React, { useState } from "react";
 import type { Category } from "../../types/expense";
+import { parseMonthDayDate } from "../../utils/TDMonthParsingHelper";
 
 interface CategoryBreakdownProps {
     categories: Category[];
 }
 
-// Helper function to parse "Month Day" format and add current year
-const parseMonthDayDate = (dateString: string): Date | "Invalid Date" => {
-    const parts = dateString.split(" ");
-    if (parts.length !== 2) {
-        return "Invalid Date";
-    }
-    const month = parts[0];
-    const day = parts[1];
-
-    const monthNames: { [key: string]: number } = {
-        JAN: 0,
-        FEB: 1,
-        MAR: 2,
-        APR: 3,
-        MAY: 4,
-        JUN: 5,
-        JUL: 6,
-        AUG: 7,
-        SEP: 8,
-        OCT: 9,
-        NOV: 10,
-        DEC: 11,
-    };
-
-    const monthIndex = monthNames[month.toUpperCase()];
-    const dayNumber = parseInt(day, 10);
-
-    if (monthIndex === undefined || isNaN(dayNumber)) {
-        return "Invalid Date";
-    }
-
-    // Use the current year. This might need adjustment if statements span across years.
-    const currentYear = new Date().getFullYear();
-
-    // Create a Date object (monthIndex is 0-based)
-    const date = new Date(currentYear, monthIndex, dayNumber);
-
-    // Basic validation to check if the date is valid (e.g., not Feb 30)
-    if (date.getFullYear() !== currentYear || date.getMonth() !== monthIndex || date.getDate() !== dayNumber) {
-        return "Invalid Date";
-    }
-
-    return date;
-};
-
 const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({ categories }) => {
     const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
-    // console.log(categories);
     return (
         <>
             <h4 className="text-lg font-medium text-neutral-900 mb-4">Category Breakdown</h4>
@@ -65,7 +20,7 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({ categories }) => 
                         >
                             <div className="min-w-0 flex-1">
                                 <p className="font-medium text-neutral-900 truncate">{item.name}</p>
-                                {item.total > 0 && <p className="text-sm text-neutral-500">{item.percentage.toFixed(0)}% of total</p>}
+                                {item.total > 0 && <p className="text-sm text-neutral-500">{item.percentage?.toFixed(0)}% of total</p>}
                             </div>
                             <div className="flex items-center flex-shrink-0 ml-4">
                                 <p className="text-lg font-semibold text-dark-800 mr-2">${item.total.toFixed(2)}</p>
