@@ -1,30 +1,33 @@
 {
-  "name": "server",
+  "name": "expense-calculator-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
+    "start": "ts-node src/index.ts",
+    "dev": "nodemon src/index.ts",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@types/express": "^5.0.2",
-    "@types/multer": "^1.4.12",
-    "@types/node": "^22.15.21",
-    "sass": "^1.89.0",
-    "sass-embedded": "^1.89.0",
-    "ts-node-dev": "^2.0.0",
-    "typescript": "^5.8.3"
-  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.817.0",
     "@aws-sdk/client-textract": "^3.817.0",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "multer": "^2.0.0",
-    "react-router-dom": "^7.6.1"
+    "@types/multer": "^1.4.12",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mongoose": "^8.1.0",
+    "multer": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.0",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
