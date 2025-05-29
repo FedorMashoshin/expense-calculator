@@ -6,12 +6,31 @@ import { analyzeDocument, waitForJob, getAnalysisResults } from "../services/tex
 import { reconstructTables, validateFileName, extractTransactions } from "../utils/textractDataProcessor";
 import { transformTransactionsToExpenseData } from "../utils/expenseDataTransformer";
 import { assignCategoriesToTransactions } from "../utils/transactionCategorizer";
+import { Expense } from "../models/Expense";
+import { Transaction } from "../types/expense";
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
+// Helper function to transform transactions to expense documents
+const transformToExpenseDocuments = (transactions: Transaction[], fileName: string) => {
+    return transactions.map(transaction => {
+        const date = new Date(transaction.transactionDate);
+        console.log(date)
+        return {
+            amount: transaction.amount,
+            category: transaction.category || 'Uncategorized',
+            description: transaction.description,
+            day: date.getDate(),
+            month: date.getMonth() + 1, // JavaScript months are 0-based
+            year: new Date().getFullYear(),
+            fileName: fileName
+        };
+    });
+};
+
 router.post(
-    '/upload',
+    '/',
     upload.single("file"),
     async (req: Request, res: Response): Promise<void> => {
         if (!req.file) {
@@ -60,11 +79,16 @@ router.post(
             // Transform data into ExpenseData format using the new function
             const expenseData = transformTransactionsToExpenseData(transactions, categories);
 
+            // Transform transactions to expense documents and save to database
+            const expenseDocuments = transformToExpenseDocuments(transactions, fileName);
+            const savedExpenses = await Expense.insertMany(expenseDocuments);
+
             res.json({
-                message: "File uploaded and analyzed successfully",
+                message: "File uploaded, analyzed, and saved successfully",
                 fileName: fileName,
                 jobId: jobId,
-                expenseData
+                expenseData,
+                savedExpensesCount: savedExpenses.length
             });
         } catch (error) {
             console.error('Error:', error);

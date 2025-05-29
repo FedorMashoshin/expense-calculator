@@ -17,28 +17,17 @@ export function transformTransactionsToExpenseData(
 
     // Group transactions by category and calculate category totals
     transactions.forEach(transaction => {
-        if (transaction.category) {
-            const category = categoryMap.get(transaction.category);
-            if (category) {
-                category.transactions.push(transaction);
-                category.total += transaction.amount;
-            } else {
-                // Handle transactions with categories not in the initial list if necessary
-                // For now, we'll just add them, but they won't be in the initially provided categories array
-                if (!categoryMap.has(transaction.category)) {
-                    categoryMap.set(transaction.category, {
-                        name: transaction.category,
-                        total: 0,
-                        transactions: []
-                    });
-                }
-                const newCategory = categoryMap.get(transaction.category);
-                if (newCategory) { // Check again after potentially adding
-                    newCategory.transactions.push(transaction);
-                    newCategory.total += transaction.amount;
-                }
-            }
+        const categoryName = transaction.category || 'Uncategorized';
+        if (!categoryMap.has(categoryName)) {
+            categoryMap.set(categoryName, {
+                name: categoryName,
+                total: 0,
+                transactions: []
+            });
         }
+        const category = categoryMap.get(categoryName)!;
+        category.transactions.push(transaction);
+        category.total += transaction.amount;
     });
 
     // Calculate overall totals

@@ -1,10 +1,6 @@
 import mongoose from 'mongoose';
 
 const expenseSchema = new mongoose.Schema({
-    date: {
-        type: Date,
-        required: true,
-    },
     amount: {
         type: Number,
         required: true,
@@ -17,6 +13,10 @@ const expenseSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    day: {
+        type: Number,
+        required: true,
+    },
     month: {
         type: Number,
         required: true,
@@ -24,6 +24,10 @@ const expenseSchema = new mongoose.Schema({
     year: {
         type: Number,
         required: true,
+    },
+    fileName: {
+        type: String,
+        required: true
     }
 }, {
     timestamps: true

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PDFUploader from "../components/PDFUploader";
 import AvailableMonths from "../components/AvailableMonths";
-import { dummyAvailableMonths } from "../types/expense";
+import type { AvailableMonth } from "../types/expense";
 
 const defaultCategories = [
     "Housing",
@@ -27,6 +27,25 @@ export default function UploadPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [availableMonthsData, setAvailableMonthsData] = useState<AvailableMonth[]>([]);
+
+    useEffect(() => {
+        const fetchAvailableMonths = async () => {
+            try {
+                const periodsRes = await fetch("http://localhost:4000/api/expenses/periods");
+                if (!periodsRes.ok) {
+                    throw new Error(`Error fetching periods: ${periodsRes.status}`);
+                }
+                const periodsData: AvailableMonth[] = await periodsRes.json();
+
+                setAvailableMonthsData(periodsData);
+            } catch (error) {
+                console.error("Failed to fetch available months:", error);
+            }
+        };
+
+        fetchAvailableMonths();
+    }, []);
 
     const handleUpload = async (file: File, categories: string[]) => {
         const formData = new FormData();
@@ -36,10 +55,8 @@ export default function UploadPage() {
         setIsLoading(true);
         setUploadProgress(0);
 
-        // Smoother progress updates
         const progressInterval = setInterval(() => {
             setUploadProgress((prev) => {
-                // Slower progress at the beginning, faster in the middle, slower at the end
                 const increment = prev < 30 ? 2 : prev < 70 ? 3 : 1;
                 if (prev >= 95) {
                     clearInterval(progressInterval);
@@ -50,7 +67,7 @@ export default function UploadPage() {
         }, 200);
 
         try {
-            const res = await fetch("/api/upload", {
+            const res = await fetch("http://localhost:4000/api/upload", {
                 method: "POST",
                 body: formData,
             });
@@ -83,13 +100,12 @@ export default function UploadPage() {
                     <p className="mt-3 text-lg text-gray-600">Upload your bank statement to analyze your expenses</p>
                 </div>
 
-                {/* Loading Overlay */}
                 {isLoading && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full mx-4">
                             <h3 className="text-lg font-medium text-gray-800 mb-4">Uploading and analyzing data...</h3>
+                            <p className="text-sm text-gray-600 mb-4">This may take up to 2 minutes depending on the file size and complexity.</p>
 
-                            {/* Progress Bar */}
                             <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                                 <div className="bg-primary-600 h-2 rounded-full transition-all duration-300 ease-out" style={{ width: `${uploadProgress}%` }}></div>
                             </div>
@@ -98,7 +114,6 @@ export default function UploadPage() {
                     </div>
                 )}
 
-                {/* Success Message */}
                 {showSuccess && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-md w-full mx-4">
@@ -113,7 +128,6 @@ export default function UploadPage() {
                     </div>
                 )}
 
-                {/* Tabs */}
                 <div className="mb-8">
                     <div className="border-b border-gray-200">
                         <nav className="-mb-px flex" aria-label="Tabs">
@@ -154,7 +168,6 @@ export default function UploadPage() {
                     </div>
                 </div>
 
-                {/* Tab Content */}
                 <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
                     {activeTab === "upload" ? (
                         <div className="p-6">
@@ -166,7 +179,7 @@ export default function UploadPage() {
                                 <h2 className="text-xl font-semibold text-gray-900 mb-2">Your Statements</h2>
                                 <p className="text-gray-600">View and analyze your uploaded bank statements</p>
                             </div>
-                            <AvailableMonths months={dummyAvailableMonths} />
+                            <AvailableMonths months={availableMonthsData} />
                             <div className="mt-6 pt-6 border-t border-gray-200">
                                 <button
                                     onClick={() => navigate("/results")}

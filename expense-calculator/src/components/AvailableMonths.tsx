@@ -20,17 +20,15 @@ export default function AvailableMonths({ months }: AvailableMonthsProps) {
             <div className="space-y-3">
                 {months.map((month) => (
                     <div
-                        key={month.month}
+                        key={month.date}
                         className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
-                        onClick={() => navigate(`/results?month=${month.month}`)}
+                        onClick={() => navigate(`/results?month=${month.date}`)}
                     >
                         <div>
-                            <p className="font-medium text-gray-900">{formatMonth(month.month)}</p>
-                            <p className="text-sm text-gray-500">Uploaded on {new Date(month.uploadDate).toLocaleDateString()}</p>
+                            <p className="font-medium text-gray-900">{formatMonth(month.date)}</p>
                         </div>
                         <div className="text-right">
                             <p className="font-semibold text-primary-600">${month.totalExpenses.toFixed(2)}</p>
-                            <p className="text-sm text-gray-500">{month.fileName}</p>
                         </div>
                     </div>
                 ))}

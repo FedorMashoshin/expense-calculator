@@ -1,46 +1,115 @@
-import React, { useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useMemo, useState, useEffect } from "react";
 import Results from "../components/results/Results";
-import type { ExpenseData } from "../types/expense";
+import FilterBar from "../components/results/FilterBar";
+import axios from "axios";
+
+interface RawExpense {
+    _id: string;
+    amount: number;
+    category: string;
+    description: string;
+    day: number;
+    month: number;
+    year: number;
+    fileName: string;
+    createdAt: string;
+    updatedAt: string;
+}
 
 export default function ResultsPage() {
-    const location = useLocation();
-    const navigate = useNavigate();
-    // Correctly type expenseDataFromLocation as it can be undefined
-    const expenseDataFromLocation = location.state?.expenseData.expenseData as ExpenseData;
+    const [expenseData, setExpenseData] = useState<RawExpense[] | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    console.log(expenseDataFromLocation);
+    // Initialize with current month and year
+    const currentDate = new Date();
+    const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
+    const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
 
-    // Wrap the calculation in useMemo to ensure stability for useEffect dependencies
-    const expenseDataToDisplay: ExpenseData | undefined = useMemo(() => {
-        if (!expenseDataFromLocation) {
-            // If no data from location, return undefined (or a minimal dummy data if preferred)
-            return undefined; // or return dummyExpenseData;
-        }
-
-        // Process data from location: filter and calculate percentages
-        return {
-            ...expenseDataFromLocation,
-            categories: expenseDataFromLocation.categories
-                .filter((category) => category.total > 0)
-                .map((category) => ({
-                    ...category,
-                    percentage: expenseDataFromLocation.totalExpenses > 0 ? (category.total / expenseDataFromLocation.totalExpenses) * 100 : 0,
-                })),
+    // Fetch data from the database
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const response = await axios.get(`/api/expenses?month=${selectedMonth}&year=${selectedYear}`);
+                setExpenseData(response.data);
+                setError(null);
+            } catch (err) {
+                setError("Failed to fetch expense data");
+                console.error("Error fetching data:", err);
+            } finally {
+                setLoading(false);
+            }
         };
-    }, [expenseDataFromLocation]); // Dependency: recalculate only when expenseDataFromLocation changes
 
-    // If no data is available, redirect to upload page
-    React.useEffect(() => {
-        if (!expenseDataToDisplay) {
-            // This check now correctly handles the undefined case
-            navigate("/upload");
-        }
-    }, [expenseDataToDisplay, navigate]); // Dependencies: redirect when data presence changes or navigate function changes
+        fetchData();
+    }, [selectedMonth, selectedYear]);
 
-    if (!expenseDataToDisplay) {
-        // This check also correctly handles the undefined case
-        return null; // Will redirect in useEffect
+    // Process the fetched data
+    const processedData = useMemo(() => {
+        if (!expenseData) return null;
+
+        // Group expenses by category
+        const categoryMap = new Map();
+        let totalExpenses = 0;
+        const numberOfTransactions = expenseData.length;
+
+        expenseData.forEach((expense) => {
+            const category = expense.category || "Uncategorized";
+            if (!categoryMap.has(category)) {
+                categoryMap.set(category, {
+                    name: category,
+                    total: 0,
+                    transactions: [],
+                });
+            }
+
+            const categoryData = categoryMap.get(category);
+            categoryData.total += expense.amount;
+            categoryData.transactions.push({
+                description: expense.description,
+                amount: expense.amount,
+                // TODO Change year from 2025 to proper year.
+                // TODO TD doesn't provide year for us. As on option we can take that from statement header, not the transactions table.
+                transactionDate: new Date(2025, expense.month - 1, expense.day),
+                category: expense.category,
+            });
+            totalExpenses += expense.amount;
+        });
+
+        return {
+            categories: Array.from(categoryMap.values()).map((category) => ({
+                ...category,
+                percentage: totalExpenses > 0 ? (category.total / totalExpenses) * 100 : 0,
+            })),
+            totalExpenses,
+            averageExpense: numberOfTransactions > 0 ? totalExpenses / numberOfTransactions : 0,
+            numberOfTransactions,
+        };
+    }, [expenseData]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="text-xl text-gray-600">Loading...</div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="text-xl text-red-600">{error}</div>
+            </div>
+        );
+    }
+
+    if (!processedData) {
+        return (
+            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+                <div className="text-xl text-gray-600">No data available for the selected period</div>
+            </div>
+        );
     }
 
     return (
@@ -51,12 +120,15 @@ export default function ResultsPage() {
                     <p className="mt-3 text-lg text-gray-600">Your expense breakdown and insights</p>
                 </div>
             </div>
+
+            <FilterBar selectedMonth={selectedMonth} selectedYear={selectedYear} onMonthChange={setSelectedMonth} onYearChange={setSelectedYear} />
+
             <div className="w-[90vw] mx-auto">
                 <Results
-                    categories={expenseDataToDisplay.categories}
-                    totalExpenses={expenseDataToDisplay.totalExpenses}
-                    averageExpense={expenseDataToDisplay.averageExpense}
-                    numberOfTransactions={expenseDataToDisplay.numberOfTransactions}
+                    categories={processedData.categories}
+                    totalExpenses={processedData.totalExpenses}
+                    averageExpense={processedData.averageExpense}
+                    numberOfTransactions={processedData.numberOfTransactions}
                 />
             </div>
         </div>

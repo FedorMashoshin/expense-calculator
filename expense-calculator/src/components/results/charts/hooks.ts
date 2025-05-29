@@ -1,16 +1,12 @@
 import type { Transaction } from "../../../types/expense";
-import { parseMonthDayDate } from "../../../utils/TDMonthParsingHelper";
 import { formatDateWithDay } from "../../../utils/TDDateWithDayFormatter";
 
 export const useSpendingData = (transactions: Transaction[]) => {
     const spendingByDate: { [date: string]: number } = {};
-
     transactions.forEach((transaction) => {
-        const date = parseMonthDayDate(transaction.transactionDate);
-        if (date !== "Invalid Date") {
-            const dateString = date.toISOString().split("T")[0];
-            spendingByDate[dateString] = (spendingByDate[dateString] || 0) + transaction.amount;
-        }
+        const date = new Date(transaction.transactionDate);
+        const dateString = date.toISOString().split("T")[0];
+        spendingByDate[dateString] = (spendingByDate[dateString] || 0) + transaction.amount;
     });
 
     const sortedDates = Object.keys(spendingByDate).sort();
@@ -45,8 +41,8 @@ export const useDayOfWeekData = (transactions: Transaction[]) => {
     };
 
     transactions.forEach((transaction) => {
-        const date = parseMonthDayDate(transaction.transactionDate);
-        if (date !== "Invalid Date") {
+        const date = new Date(transaction.transactionDate);
+        if (date) {
             const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" });
             spendingByDayOfWeek[dayOfWeek] += transaction.amount;
             transactionsPerDay[dayOfWeek]++;

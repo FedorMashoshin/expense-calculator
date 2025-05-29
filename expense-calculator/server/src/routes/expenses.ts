@@ -1,13 +1,13 @@
-import express from 'express';
+import { Router, Request, Response } from 'express';
 import { Expense } from '../models/Expense';
 
-const router = express.Router();
+const router = Router();
 
 // Get expenses with optional month and year filters
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
     try {
         const { month, year } = req.query;
-        const query: any = {};
+        const query: { month?: number; year?: number } = {};
 
         if (month && year) {
             query.month = parseInt(month as string);
@@ -43,29 +43,39 @@ router.post('/', async (req, res) => {
 // Get available years and months
 router.get('/periods', async (req, res) => {
     try {
-        const periods = await Expense.aggregate([
+        const results = await Expense.aggregate([
             {
                 $group: {
-                    _id: {
-                        year: '$year',
-                        month: '$month'
-                    }
+                    _id: { year: "$year", month: "$month" },
+                    totalExpenses: { $sum: "$amount" }
                 }
             },
             {
-                $sort: {
-                    '_id.year': -1,
-                    '_id.month': -1
+                $project: {
+                    _id: 0,
+                    date: {
+                        $concat: [
+                            { $toString: "$_id.year" },
+                            "-",
+                            {
+                                $cond: [
+                                    { $lte: ["$_id.month", 9] },
+                                    { $concat: ["0", { $toString: "$_id.month" }] },
+                                    { $toString: "$_id.month" }
+                                ]
+                            }
+                        ]
+                    },
+                    totalExpenses: 1
                 }
-            }
+            },
+            { $sort: { date: -1 } }
         ]);
 
-        const years = [...new Set(periods.map(p => p._id.year))];
-        const months = [...new Set(periods.map(p => p._id.month))];
-
-        res.json({ years, months });
+        res.json(results);
     } catch (error) {
-        res.status(500).json({ message: 'Error fetching periods', error });
+        console.error('Error fetching periods:', error);
+        res.status(500).json({ message: 'Error fetching periods', error: error instanceof Error ? error.message : 'Unknown error' });
     }
 });
 

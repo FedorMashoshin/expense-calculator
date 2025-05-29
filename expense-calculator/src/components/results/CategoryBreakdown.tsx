@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import type { Category } from "../../types/expense";
-import { parseMonthDayDate } from "../../utils/TDMonthParsingHelper";
 
 interface CategoryBreakdownProps {
     categories: Category[];
@@ -39,8 +38,8 @@ const CategoryBreakdown: React.FC<CategoryBreakdownProps> = ({ categories }) => 
                                 <div className="border-t border-neutral-200 p-3 bg-white">
                                     <div className="space-y-2">
                                         {item.transactions.map((transaction, tIndex) => {
-                                            const date = parseMonthDayDate(transaction.transactionDate);
-                                            const displayDate = date === "Invalid Date" ? "Invalid Date" : date.toLocaleDateString();
+                                            const date = new Date(transaction.transactionDate);
+                                            const displayDate = date.toLocaleDateString();
                                             return (
                                                 <div
                                                     key={tIndex}
