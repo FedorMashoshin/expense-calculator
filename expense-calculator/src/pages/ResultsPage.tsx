@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import Results from "../components/results/Results";
 import FilterBar from "../components/results/FilterBar";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 interface RawExpense {
     _id: string;
@@ -20,6 +21,7 @@ export default function ResultsPage() {
     const [expenseData, setExpenseData] = useState<RawExpense[] | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
 
     // Initialize with current month and year
     const currentDate = new Date();
@@ -118,6 +120,13 @@ export default function ResultsPage() {
                 <div className="text-center">
                     <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Expense Analysis</h1>
                     <p className="mt-3 text-lg text-gray-600">Your expense breakdown and insights</p>
+                    {/* TODO: TO style that button */}
+                    <button
+                        onClick={() => navigate("/upload")}
+                        className="mt-4 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        Go to Upload Page
+                    </button>
                 </div>
             </div>
 

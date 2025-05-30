@@ -182,6 +182,7 @@ export default function UploadPage() {
                             <AvailableMonths months={availableMonthsData} />
                             <div className="mt-6 pt-6 border-t border-gray-200">
                                 <button
+                                    // TODO Pass actual # of the month that was clicked. Now its just current month
                                     onClick={() => navigate("/results")}
                                     className="w-full inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                                 >
